@@ -1,0 +1,9 @@
+# Ignore all CSV files
+*.csv
+
+# Optional: Ignore other large file types
+*.zip
+*.tar
+*.gz
+*.mp4
+*.mp3
