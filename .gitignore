@@ -1,9 +1,15 @@
-# Ignore all CSV files
-*.csv
+# Ignore the entire dataset folder
+data/raw/
 
-# Optional: Ignore other large file types
+# Ignore specific large files
+*.csv
+*.xlsx
+*.parquet
 *.zip
-*.tar
-*.gz
-*.mp4
-*.mp3
+
+# Ignore Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
