@@ -1,10 +1,3 @@
-Here’s a **small README.md** and a **short project description** to get you started:  
-
----
-
-### **📝 README.md (Minimal Version)**  
-
-```md
 # Fraud Detection with Apache Spark & AWS
 
 This project implements a scalable **fraud detection system** using **Apache Spark on AWS EMR**.  
@@ -37,7 +30,7 @@ It processes large financial transaction datasets, applies machine learning mode
 ## 🔧 Setup & Usage:
 1. Clone the repository:  
    ```sh
-   git clone https://github.com/yourusername/fraud-detection-spark.git
+   git clone https://github.com/yashvisharma1204/fraud-detection-spark.git
    ```
 2. Install dependencies:  
    ```sh
@@ -53,12 +46,3 @@ It processes large financial transaction datasets, applies machine learning mode
 ## 📜 License:
 MIT License
 ```
-
----
-
-### **📌 Short Project Description**
-_"A scalable fraud detection system leveraging **Apache Spark on AWS EMR** for large-scale financial transaction processing. This project enables distributed inference, efficient ML predictions, and AI-generated fraud analysis reports stored in AWS S3."_  
-
----
-
-Let me know if you need a more detailed **README** or if you want any specific sections added! 🚀
