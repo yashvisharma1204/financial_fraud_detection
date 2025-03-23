@@ -6,6 +6,7 @@ data/raw/
 *.xlsx
 *.parquet
 *.zip
+*.pkl 
 
 # Ignore Jupyter notebook checkpoints
 .ipynb_checkpoints/
