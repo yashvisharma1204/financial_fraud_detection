@@ -154,9 +154,9 @@ aws s3 rb s3://fraudetection
 ---
 
 ## 🧠 Model Insights
-- **Model**: e.g., Random Forest / XGBoost
-- **Metrics**: Accuracy, Precision, Recall
-- **Top Features**: Amount, Transaction Type, Location, Time
+- **Model**: e.g., Random Forest / XGBoost/Decsion Tree/Logistic Regression
+- **Metrics**: Accuracy, Precision, Recall,Confusion Matrix
+- **Top Features**: Amount, Category,Age , Time,Gender
 
 ---
 
