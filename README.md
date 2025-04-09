@@ -1,103 +1,169 @@
-# Fraud Detection System
+# 🛡️ Fraud Detection System
 
-This project implements an end-to-end fraud detection system using machine learning. The system processes transaction data, trains a fraud detection model, and generates reports using Gemini Gen AI.
+An end-to-end fraud detection system using machine learning and AWS cloud infrastructure. It ingests transaction data, preprocesses it, predicts fraud using a trained model, and generates insightful reports using Gemini Gen AI.
 
-## Project Structure
+---
+
+## 📁 Project Structure (GitHub Repository Overview)
 
 ```
 fraud-detection/
 │
-├── notebooks/                           # Jupyter notebooks for development
-│   ├── EDA_and_Preprocessing.ipynb      # Exploratory Data Analysis & Preprocessing
-│   ├── Model_Training.ipynb             # Model training and evaluation
-│   └── Model_Deployment.ipynb           # Model deployment to .pkl
+├── notebooks/                           # Jupyter notebooks for exploration & prototyping
+│   ├── EDA_and_Preprocessing.ipynb      # Data cleaning, EDA, and preprocessing
+│   ├── Model_Training.ipynb             # Model training, evaluation, metrics
+│   └── Model_Deployment.ipynb           # Exporting model to .pkl for deployment
 │
-├── scripts/                             # Processing and simulation scripts
-│   ├── preprocessing_pipeline.py        # Data preprocessing pipeline
-│   └── fraud_simulation.py              # Fraud prediction and report generation
+├── scripts/                             # Core scripts for production workflows
+│   ├── preprocessing_pipeline.py        # End-to-end preprocessing script for raw data
+│   └── fraud_simulation.py              # Loads model, predicts fraud, generates reports
 │
-├── model/                               # Trained models
+├── model/                               # Stores trained ML models
 │   └── model.pkl                        # Serialized fraud detection model
 │
-└── aws_bucket/                          # AWS S3 bucket structure
-    ├── input/                           # New transaction data for processing
-    ├── processed/                       # Processed data from pipeline
-    └── output/                          # Generated fraud reports
+└── aws_bucket/                          # Represents AWS S3 bucket layout
+    ├── input/                           # Uploads new raw transactions
+    ├── processed/                       # Processed data post-cleaning
+    └── output/                          # Fraud prediction reports
 ```
 
-## Workflow Overview
+---
 
-1. **Data Preparation**:
-   - Raw data is preprocessed (cleaning, transformation, encoding)
-   - EDA performed to understand data characteristics
+## 🚀 End-to-End Workflow
 
-2. **Model Training**:
-   - Model trained on historical transaction data
-   - Serialized as `model.pkl` for deployment
+1. **Data Ingestion** → via `aws_bucket/input/`
+2. **Preprocessing** → `preprocessing_pipeline.py` (via Spark on EMR)
+3. **Prediction** → `fraud_simulation.py` uses `model.pkl`
+4. **Report Generation** → Output to `aws_bucket/output/`
 
-3. **AWS Deployment**:
-   - New data uploaded to `input/` folder in S3 bucket
-   - EC2 and EMR instances launched for processing
-   - PySpark processes the data using the deployed model
+---
 
-4. **Processing Pipeline**:
-   - `preprocessing_pipeline.py` processes new data
-   - Results stored in `processed/` folder
+## ☁️ AWS Deployment Documentation (Core Focus)
 
-5. **Fraud Simulation & Reporting**:
-   - `fraud_simulation.py` makes predictions using the model
-   - Generates reports with Gemini Gen AI
-   - Reports saved in `output/` folder
+### 1. ✅ IAM & Permissions
 
-## Setup Instructions
+- Create a role with:
+  - `AmazonS3FullAccess`
+  - `AmazonEMRFullAccessPolicy_v2`
+  - `AmazonEC2FullAccess`
+  - `CloudWatchLogsFullAccess`
+- Use the role in EC2/EMR setup for full operational access.
 
-### Prerequisites
-- Python 3.8+
-- AWS account with S3, EC2, and EMR access
-- Required Python packages (see requirements.txt)
+---
 
-### Deployment Steps
+### 2. 🪣 S3 Bucket Configuration
 
-1. Upload model and scripts to AWS:
-   ```bash
-   aws s3 cp model/model.pkl s3://fraudetection/model/
-   aws s3 cp scripts/ s3://fraudetection/scripts/ --recursive
-   ```
+Create S3 bucket and folder hierarchy:
 
-2. Launch EC2 and EMR instances:
-   ```bash
-   # Configure your instances as needed
-   ```
+```bash
+aws s3 mb s3://fraudetection
 
-3. Process new data:
-   ```bash
-   spark-submit --deploy-mode cluster s3://fraudetection/scripts/preprocessing_pipeline.py
-   ```
+# Optional: enforce access policy
+aws s3api put-bucket-policy --bucket fraudetection --policy file://bucket-policy.json
+```
 
-4. Generate fraud report:
-   ```bash
-   python3 fraud_simulation.py --input processed/ --output output/
-   ```
+**bucket-policy.json** (adjust `YOUR_ACCOUNT_ID`):
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": {
+      "AWS": "arn:aws:iam::YOUR_ACCOUNT_ID:role/EMR_EC2_DefaultRole"
+    },
+    "Action": ["s3:GetObject", "s3:PutObject", "s3:ListBucket"],
+    "Resource": ["arn:aws:s3:::fraudetection", "arn:aws:s3:::fraudetection/*"]
+  }]
+}
+```
 
-## Script Details
+Upload required files:
+
+```bash
+aws s3 cp model/model.pkl s3://fraudetection/model/
+aws s3 cp scripts/ s3://fraudetection/scripts/ --recursive
+```
+
+---
+
+### 3. 📊 Launch EMR Cluster
+
+```bash
+aws emr create-cluster \
+  --name "FraudDetectionCluster" \
+  --release-label emr-6.9.0 \
+  --applications Name=Spark Name=Hadoop \
+  --ec2-attributes KeyName=your-key,InstanceProfile=EMR_EC2_DefaultRole \
+  --instance-type m5.xlarge --instance-count 3 \
+  --use-default-roles \
+  --log-uri s3://fraudetection/logs/
+```
+
+🧾 **Recommended Configs**:
+- EMR 6.9.0 with Spark 3.3.1
+- 1 Master, 2 Worker Nodes
+- EC2 Key Pair required for SSH
+
+---
+
+### 4. 🔄 Run Data Pipeline & Simulation
+
+**From EMR Master Node:**
+
+```bash
+# Run Preprocessing
+spark-submit --deploy-mode cluster \
+  s3://fraudetection/scripts/preprocessing_pipeline.py \
+  --input s3://fraudetection/input/ \
+  --output s3://fraudetection/processed/
+
+# Run Fraud Detection
+python3 fraud_simulation.py \
+  --model s3://fraudetection/model/model.pkl \
+  --input s3://fraudetection/processed/ \
+  --output s3://fraudetection/output/
+```
+
+---
+
+### 5. 🧹 Cleanup Resources
+
+```bash
+# Stop EMR
+aws emr terminate-clusters --cluster-ids j-XXXXXXXXXXXX
+
+# Delete S3 data
+aws s3 rm s3://fraudetection --recursive
+aws s3 rb s3://fraudetection
+```
+
+---
+
+## 🔍 Script Highlights
 
 ### `preprocessing_pipeline.py`
-- Performs data cleaning and transformation
-- Handles missing values and feature engineering
-- Outputs processed data ready for prediction
+- Cleans and transforms raw transaction data
+- Handles missing values, encodes features
+- Outputs to S3 `processed/` directory
 
 ### `fraud_simulation.py`
-- Loads the trained model
-- Makes predictions on processed data
-- Generates fraud analysis report using Gemini Gen AI
+- Loads trained `model.pkl`
+- Predicts fraud
+- Uses Gemini Gen AI to generate human-readable reports
 
-## Model Information
-- Algorithm: [Specify your model type, e.g., Random Forest, XGBoost]
-- Features used: [List important features]
-- Performance metrics: [Include accuracy, precision, recall, etc.]
+---
 
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+## 🧠 Model Insights
+- **Model**: e.g., Random Forest / XGBoost
+- **Metrics**: Accuracy, Precision, Recall
+- **Top Features**: Amount, Transaction Type, Location, Time
 
-## License
-[MIT](https://choosealicense.com/licenses/mit/)
+---
+
+## 🤝 Contributing
+
+Pull requests and feedback are welcome! Please open issues for major changes or suggestions.
+
+## 📜 License
+[MIT License](https://choosealicense.com/licenses/mit/)
+
