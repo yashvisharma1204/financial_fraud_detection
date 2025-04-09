@@ -37,6 +37,7 @@ fraud-detection/
 4. **Report Generation** → Output to `aws_bucket/output/`
 
 ---
+![Untitled Diagram drawio (3)](https://github.com/user-attachments/assets/a3056aa0-1b41-42ac-be0d-200d9da56b38)
 
 ## ☁️ AWS Deployment Documentation (Core Focus)
 
