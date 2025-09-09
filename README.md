@@ -14,6 +14,7 @@
 </p>
 
 </div> 
+
 ---
 
 ## 📖 1. Business Context & Project Goal  
@@ -134,5 +135,6 @@ Contributions are welcome! Feel free to open issues, suggest improvements, or su
 ## 📜 License
 
 This project is licensed under the [MIT License](https://choosealicense.com/licenses/mit/).
+
 
 
