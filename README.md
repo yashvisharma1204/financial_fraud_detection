@@ -1,7 +1,6 @@
 <div align="center">
 
-🛡️ End-to-End Fraud Detection System on AWS
-</div>
+# 🛡️ End-to-End Fraud Detection System on AWS
 
 <p align="center">
   <img src="https://img.shields.io/badge/-AWS-232F3E?logo=amazonaws&logoColor=white" alt="AWS"/>
@@ -14,57 +13,64 @@
   <img src="https://img.shields.io/badge/-Gemini%20Gen%20AI-4285F4?logo=google&logoColor=white" alt="Gemini Gen AI"/>
 </p>
 
-</div>
+</div> 
+---
 
-📖 1. Business Context & Project Goal
-In the digital economy, financial fraud poses a significant threat to businesses and consumers alike, leading to billions of dollars in losses annually. Proactively identifying and preventing fraudulent transactions is paramount for maintaining customer trust and financial stability.
+## 📖 1. Business Context & Project Goal  
+In today’s digital economy, **financial fraud** is a growing threat, costing businesses and consumers billions annually. Proactively detecting and preventing fraudulent transactions is essential for **customer trust** and **financial stability**.  
 
-The Goal: This project addresses this challenge by designing and deploying a scalable, end-to-end fraud detection pipeline on the AWS cloud. The system ingests raw transaction data, processes it at scale using Apache Spark, predicts fraudulent activity with a machine learning model, and generates insightful reports using Gemini Gen AI.
+**The Goal**: Build and deploy a **scalable, end-to-end fraud detection pipeline** on AWS.  
+- Ingests raw transaction data  
+- Processes it at scale using **Apache Spark**  
+- Predicts fraud with a **machine learning model**  
+- Generates **actionable reports** with Gemini Gen AI  
 
-This repository is presented as a complete case study, as if I were a Data Engineer tasked with building a production-ready fraud detection system for a financial services company.
+This repository is structured as a **real-world case study**, simulating the role of a Data Engineer tasked with delivering a production-ready fraud detection system.  
 
-🏛️ 2. The Technical Solution: A Cloud-Based ML Pipeline
-To handle the high volume and velocity of financial data, I architected a robust, cloud-native pipeline using AWS services. This ensures the solution is scalable, automated, and capable of processing data in large batches.
+---
 
-Data Lake & Storage (AWS S3): An S3 bucket serves as the central data lake, with a structured hierarchy for raw input data (input/), cleaned data (processed/), and final fraud reports (output/).
+## 🏛️ 2. Technical Solution: A Cloud-Native ML Pipeline  
+To handle the **high volume & velocity** of financial data, the pipeline is fully cloud-native, leveraging AWS services for **scalability, automation, and efficiency**.  
 
-Large-Scale Data Processing (AWS EMR & Spark): An EMR cluster running Apache Spark is used to execute the preprocessing_pipeline.py script. This allows for distributed, parallel processing of massive transaction datasets, ensuring the ETL process is fast and efficient.
+### ⚙️ Architecture Overview  
+- **Data Lake & Storage (AWS S3):**  
+  Centralized data lake with folders for raw data (`input/`), processed data (`processed/`), reports (`output/`), models, scripts, and logs.  
 
-Machine Learning Inference: The fraud_simulation.py script loads a pre-trained machine learning model (model.pkl) to score the processed transactions and identify potential fraud.
+- **Large-Scale Processing (AWS EMR + Spark):**  
+  Distributed ETL via `preprocessing_pipeline.py` for cleaning & feature engineering.  
 
-Automated Reporting (Gemini Gen AI): After prediction, the simulation script leverages the Gemini API to synthesize the results into human-readable, actionable reports for the risk analysis team.
+- **Fraud Prediction (ML Inference):**  
+  `fraud_simulation.py` loads a **Random Forest Classifier** (`model.pkl`) to detect suspicious transactions.  
 
-🧠 3. Model Insights & Key Findings
-A Random Forest Classifier was trained on the dataset due to its robustness and ability to handle imbalanced classes.
+- **Automated Reporting (Gemini Gen AI):**  
+  Converts prediction outputs into **human-readable fraud reports** for risk teams.  
 
-Performance Metrics: The model was evaluated on its ability to correctly identify fraudulent transactions while minimizing false positives.
+---
 
-Precision: High precision ensures that when the model flags a transaction as fraudulent, it is highly likely to be correct.
+## 🧠 3. Model Insights & Key Findings  
+The **Random Forest Classifier** was chosen for robustness and handling imbalanced data.  
 
-Recall: High recall ensures that the model successfully identifies a large percentage of all actual fraudulent transactions.
+**Key Metrics:**  
+- 🎯 **Precision:** Ensures flagged fraud cases are highly reliable  
+- 🔍 **Recall:** Captures the majority of fraudulent transactions  
+- ⚖️ **Balance:** Minimized false positives while maximizing detection  
 
-Key Predictive Features: The most influential features in detecting fraud were found to be:
+**Top Predictive Features:**  
+- Transaction Amount  
+- Transaction Category (e.g., shopping, travel)  
+- Time of Day  
+- Customer Age  
 
-Transaction Amount
+---
 
-Transaction Category (e.g., online shopping, travel)
+## ☁️ 4. AWS Deployment & Execution Guide  
 
-Time of Day
-
-Customer Age
-
-☁️ 4. AWS Deployment & Execution Guide
-This section provides the technical steps to deploy and run the entire pipeline on AWS.
-
-✅ Step 1: IAM & S3 Bucket Setup
-Create an IAM Role for EC2/EMR with the following policies: AmazonS3FullAccess, AmazonEMRFullAccessPolicy_v2, AmazonEC2FullAccess, CloudWatchLogsFullAccess.
-
-Create and configure the S3 bucket:
-
-# Create the bucket
+### ✅ Step 1: IAM & S3 Setup  
+```bash
+# Create bucket
 aws s3 mb s3://fraudetection
 
-# Create the folder structure
+# Folder structure
 aws s3api put-object --bucket fraudetection --key input/
 aws s3api put-object --bucket fraudetection --key processed/
 aws s3api put-object --bucket fraudetection --key output/
@@ -72,54 +78,61 @@ aws s3api put-object --bucket fraudetection --key model/
 aws s3api put-object --bucket fraudetection --key scripts/
 aws s3api put-object --bucket fraudetection --key logs/
 
-Upload project files to S3:
-
+# Upload files
 aws s3 cp model/model.pkl s3://fraudetection/model/
 aws s3 cp scripts/ s3://fraudetection/scripts/ --recursive
+````
 
-📊 Step 2: Launch the EMR Cluster
-Launch a 3-node EMR cluster. Ensure you have an EC2 Key Pair (your-key) created in your AWS account.
+### 📊 Step 2: Launch EMR Cluster
 
+```bash
 aws emr create-cluster \
-    --name "FraudDetectionCluster" \
-    --release-label emr-6.9.0 \
-    --applications Name=Spark Name=Hadoop \
-    --ec2-attributes KeyName=your-key,InstanceProfile=EMR_EC2_DefaultRole \
-    --instance-type m5.xlarge --instance-count 3 \
-    --use-default-roles \
-    --log-uri s3://fraudetection/logs/
+  --name "FraudDetectionCluster" \
+  --release-label emr-6.9.0 \
+  --applications Name=Spark Name=Hadoop \
+  --ec2-attributes KeyName=your-key,InstanceProfile=EMR_EC2_DefaultRole \
+  --instance-type m5.xlarge --instance-count 3 \
+  --use-default-roles \
+  --log-uri s3://fraudetection/logs/
+```
 
-🔄 Step 3: Execute the Pipeline on EMR
-Connect to the EMR master node via SSH and run the processing and prediction jobs.
+### 🔄 Step 3: Run Pipeline Jobs
 
-# 1. Run the Spark preprocessing job
+```bash
+# 1. Preprocessing (Spark ETL)
 spark-submit --deploy-mode cluster \
-    s3://fraudetection/scripts/preprocessing_pipeline.py \
-    --input s3://fraudetection/input/ \
-    --output s3://fraudetection/processed/
+  s3://fraudetection/scripts/preprocessing_pipeline.py \
+  --input s3://fraudetection/input/ \
+  --output s3://fraudetection/processed/
 
-# 2. Run the fraud detection and reporting job
+# 2. Fraud Detection + Reporting
 python3 s3://fraudetection/scripts/fraud_simulation.py \
-    --model s3://fraudetection/model/model.pkl \
-    --input s3://fraudetection/processed/ \
-    --output s3://fraudetection/output/
+  --model s3://fraudetection/model/model.pkl \
+  --input s3://fraudetection/processed/ \
+  --output s3://fraudetection/output/
+```
 
-🧹 Step 4: Cleanup
-After the jobs are complete, terminate the EMR cluster and delete the S3 bucket to avoid ongoing charges.
+### 🧹 Step 4: Cleanup
 
-# Terminate the cluster (replace with your cluster ID)
+```bash
+# Terminate cluster
 aws emr terminate-clusters --cluster-ids j-XXXXXXXXXXXX
 
-# Empty and delete the S3 bucket
+# Remove S3 bucket
 aws s3 rm s3://fraudetection --recursive
 aws s3 rb s3://fraudetection
+```
 
+---
 
 ## 🤝 Contributing
 
-Pull requests and feedback are welcome! Please open issues for major changes or suggestions.
+Contributions are welcome! Feel free to open issues, suggest improvements, or submit pull requests.
+
+---
 
 ## 📜 License
-[MIT License](https://choosealicense.com/licenses/mit/)
+
+This project is licensed under the [MIT License](https://choosealicense.com/licenses/mit/).
 
 
